@@ -210,19 +210,14 @@ in
 GetDocTypes = (baseUrl as text) as table =>
 let
     json = FrappeGetJson(
-    baseUrl,
-    "/api/resource/DocType",
-    [
-        fields = "[""name"",""module"",""istable"",""issingle""]",
-        limit_page_length = "99999",
+        baseUrl,
+        "/api/method/pbi_integration.api.documents.get_doctypes",
+        [
+            fields   = "[""name"",""module"",""istable""]",
+            order_by = "name"
+        ]
+    ),
 
-        filters = "{""issingle"":0}"
-        // Optional: also remove child tables
-        // filters = "{""issingle"":0,""istable"":0}"
-    ]
-),
-
-    // If no [data], show payload (don't silently return empty)
     _ =
         if IsFrappeErrorPayload(json) then
             error Error.Record(
@@ -230,38 +225,25 @@ let
                 "Frappe Error - " & GetFrappeErrorMessage(json),
                 json
             )
-        else if not Record.HasFields(json, "data") then
+        else if not Record.HasFields(json, "message") then
             error Error.Record(
                 "FrappeConn",
-                "DocType list did not return [data].",
+                "DocType list did not return [message].",
                 json
             )
         else
             null,
 
-    rows = Record.FieldOrDefault(json, "data", {}),
+    // ✅ New API returns message as list directly — not json[data]
+    rows = json[message],
     t0   = Table.FromRecords(rows),
 
-
-    // Normalize types
     t1 = Table.TransformColumns(
         t0,
         {
-            {"name", each Text.From(_), type text},
+            {"name",   each Text.From(_), type text},
             {"module", each try Text.From(_) otherwise null, type nullable text},
-
-            // Frappe often returns 0/1 (number) or "0"/"1" (text)
             {"istable", each
-                let v = _
-                in
-                    if v is logical then v
-                    else if v is number then v <> 0
-                    else if v is text then (v = "1" or Text.Lower(v) = "true")
-                    else false,
-             type logical},
-
-            // ✅ ADDED: normalize issingle
-            {"issingle", each
                 let v = _
                 in
                     if v is logical then v
@@ -272,11 +254,9 @@ let
         }
     ),
 
-    tClean = Table.RemoveColumns(t1, {"issingle"}),
-
-    // ✅ Add a normalized module used for grouping + filtering
+    // ✅ No issingle in new API — removed that column and filter
     t2 = Table.AddColumn(
-        tClean,
+        t1,
         "module_norm",
         each
             let m = [module]
@@ -285,7 +265,6 @@ let
                 else Text.Trim(m),
         type text
     )
-
 in
     t2;
 
@@ -435,17 +414,16 @@ let
     metaJson =
         FrappeGetJson(
             baseUrl,
-            "/api/resource/DocType/" & Uri.EscapeDataString(doctype),
-            null
+            "/api/method/pbi_integration.api.documents.get_doctype_meta",
+            [ doctype = doctype ]
         ),
 
-    metaRec = if metaJson is record then Record.FieldOrDefault(metaJson, "data", null) else null,
+    // ✅ New API returns message as record directly — not json[data]
+    metaRec = if metaJson is record then Record.FieldOrDefault(metaJson, "message", null) else null,
     fields  = if metaRec is record then Record.FieldOrDefault(metaRec, "fields", {}) else {},
 
-    // Always keep name
     base = { {"name", type text} },
 
-    // Keep only “real” data fields
     dataFields =
         List.Select(
             fields,
@@ -461,19 +439,19 @@ let
         ),
 
     rows =
-    base &
-    List.RemoveNulls(
-        List.Transform(
-            dataFields,
-            (f) =>
-                let
-                    fname = try Text.Trim(Text.From(f[fieldname])) otherwise null,
-                    ftype = try Text.From(f[fieldtype]) otherwise null
-                in
-                    if fname = null or fname = "" then null
-                    else { fname, FrappeFieldTypeToMType(ftype) }
-        )
-    ),
+        base &
+        List.RemoveNulls(
+            List.Transform(
+                dataFields,
+                (f) =>
+                    let
+                        fname = try Text.Trim(Text.From(f[fieldname])) otherwise null,
+                        ftype = try Text.From(f[fieldtype]) otherwise null
+                    in
+                        if fname = null or fname = "" then null
+                        else { fname, FrappeFieldTypeToMType(ftype) }
+            )
+        ),
 
     schema = #table({"Name","Type"}, rows)
 in
@@ -1154,5 +1132,5 @@ FrappeConn = [
 FrappeConn.Publish = [
     Beta = true,
     Category = "Other",
-    ButtonText = { "Frappe Framework", "Frappe Framework" }
+    ButtonText = { "Frappe Documents", "Frappe Documents" }
 ];
