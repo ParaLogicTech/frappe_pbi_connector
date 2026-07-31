@@ -143,7 +143,7 @@ let
             ]
         }),
 
-    // ✅ Log Web.Contents failures
+    // Log Web.Contents failures
     response =
         LogFailure(
             "Web.Contents failed",
@@ -157,7 +157,7 @@ let
         then meta_res[#"Response.Status"]
         else 200,
 
-    // ✅ Log Json.Document failures
+    // Log Json.Document failures
     bodyJson =
         LogFailure(
             "Json.Document failed",
@@ -194,7 +194,7 @@ let
 in
     if bodyJson <> null then bodyJson else error Error.Record("FrappeConn", "Non-JSON response.", bodyText);
 
-// Your old Feed can stay (returns raw JSON from base URL)
+// Returns raw JSON from base URL)
 FrappeConnImpl = (url as text) as any =>
 let
     root = NormalizeBaseUrl(url),
@@ -234,7 +234,7 @@ let
         else
             null,
 
-    // ✅ New API returns message as list directly — not json[data]
+    // New API returns message as list directly — not json[data]
     rows = json[message],
     t0   = Table.FromRecords(rows),
 
@@ -254,7 +254,6 @@ let
         }
     ),
 
-    // ✅ No issingle in new API — removed that column and filter
     t2 = Table.AddColumn(
         t1,
         "module_norm",
@@ -269,7 +268,7 @@ in
     t2;
 
 // ----------------------------
-// Schema helpers (TripPin 6 style)
+// Schema helpers
 // ----------------------------
 EnforceSchema.Strict = 1;
 EnforceSchema.IgnoreExtraColumns = 2;
@@ -283,7 +282,7 @@ let
     // normalize Name to text
     s1 = Table.TransformColumns(s0, {{"Name", each Text.From(_), type text}}),
 
-    // ✅ KEEP ONLY rows where [Type] is actually a PQ "type"
+    // KEEP ONLY rows where [Type] is actually a PQ "type"
     s2 = Table.SelectRows(s1, each Value.Is([Type], type type)),
 
     // remove duplicates by Name (keep first)
@@ -341,22 +340,15 @@ in
 
 ValidateSchema = (schema as table, context as text) as table =>
 let
-    // Keep only Name + Type
     s0 = Table.SelectColumns(schema, {"Name","Type"}, MissingField.Error),
-
-    // Normalize Name to text
     s1 = Table.TransformColumns(s0, {{"Name", each Text.From(_), type text}}),
-
-    // Filter to only rows where Type is an M type value
     s2 = Table.SelectRows(
         s1,
         each
             [Name] <> null
             and Text.Trim([Name]) <> ""
-            and Value.Is([Type], type type)   // ✅ correct check
+            and Value.Is([Type], type type)
     ),
-
-    // If anything got dropped, show what was bad (this is the key to debugging)
     bad = Table.SelectRows(
         s1,
         each
@@ -364,7 +356,6 @@ let
             or Text.Trim(Text.From([Name])) = ""
             or not Value.Is([Type], type type)
     ),
-
     _ =
         if Table.RowCount(bad) > 0 then
             error Error.Record(
@@ -374,13 +365,11 @@ let
             )
         else
             null,
-
     cleaned = Table.Distinct(s2, {"Name"})
 in
     cleaned;
 
-
-// A simple mapping - you can expand later
+// Simple mapping
 FrappeFieldTypeToMType = (ft as nullable text) as type =>
 let
     x = if ft = null then "" else Text.Lower(Text.Trim(ft)),
@@ -418,7 +407,6 @@ let
             [ doctype = doctype ]
         ),
 
-    // ✅ New API returns message as record directly — not json[data]
     metaRec = if metaJson is record then Record.FieldOrDefault(metaJson, "message", null) else null,
     fields  = if metaRec is record then Record.FieldOrDefault(metaRec, "fields", {}) else {},
 
@@ -453,7 +441,8 @@ let
             )
         ),
 
-    schema = #table({"Name","Type"}, rows)
+    // Now returns {Name, Type}
+    schema = #table({"Name", "Type"}, rows)
 in
     schema;
 
@@ -867,37 +856,39 @@ let
 
     // 1) Schema
     schemaTry = try GetDocTypeSchema(baseUrl, doctype),
-    schema0 =
-        if schemaTry[HasError] then
-            #table({"Name","Type"}, {{"name", type text}})
-        else
-            schemaTry[Value],
+schema0 =
+    if schemaTry[HasError] then
+        #table({"Name", "Type"}, {{"name", type text}})
+    else
+        schemaTry[Value],
 
     schema = ValidateSchema(schema0, "GetDocTypeSchema(" & doctype & ")"),
 
-    RecordsToTable = (rows as list, optional cols as nullable list) as table =>
-    let
-        effectiveSchema =
-            if cols <> null and List.Count(cols) > 0 then
-                Table.SelectRows(schema, each List.Contains(cols, [Name]))
-            else
-                schema,
 
-        t0 =
-            if List.IsEmpty(rows) then
-                Table.FromRows({}, effectiveSchema[Name])
-            else
-                Table.FromRecords(rows),
 
-        t1 = SchemaTransformTable(t0, effectiveSchema, EnforceSchema.IgnoreExtraColumns)
-    in
-        t1,
+RecordsToTable = (rows as list, optional cols as nullable list) as table =>
+let
+    effectiveSchema =
+        if cols <> null and List.Count(cols) > 0 then
+            Table.SelectRows(schema, each List.Contains(cols, [Name]))
+        else
+            schema,
 
-    baseTable = SchemaTransformTable(
-                Table.FromRows({}, List.Transform(schema[Name], each Text.From(_))),
-                schema,
-                EnforceSchema.IgnoreExtraColumns
-            ),
+    t0 =
+        if List.IsEmpty(rows) then
+            Table.FromRows({}, effectiveSchema[Name])
+        else
+            Table.FromRecords(rows),
+
+    t1 = SchemaTransformTable(t0, effectiveSchema, EnforceSchema.IgnoreExtraColumns)
+in
+    t1,
+
+baseTable = SchemaTransformTable(
+    Table.FromRows({}, List.Transform(schema[Name], each Text.From(_))),
+    schema,
+    EnforceSchema.IgnoreExtraColumns
+),
 
     // 3) General fetch
    Fetch =
@@ -950,96 +941,96 @@ in
         Table.View(
             null,
             [
-                GetType = () as type =>
-    let
-        cols0 = Record.FieldOrDefault(state, "Columns", null),
-        cols =
-            if cols0 is list and List.Count(cols0) > 0 then
-                List.Intersect({cols0, schema[Name]})
-            else
-                schema[Name],
+            GetType = () as type =>
+let
+    cols0 = Record.FieldOrDefault(state, "Columns", null),
+    cols =
+        if cols0 is list and List.Count(cols0) > 0 then
+            List.Intersect({cols0, schema[Name]})
+        else
+            schema[Name],
 
-        filtered = Table.SelectRows(schema, each List.Contains(cols, [Name])),
-        empty    = Table.FromRows({}, List.Transform(filtered[Name], each Text.From(_))),
-        typed    = SchemaTransformTable(empty, filtered, EnforceSchema.Strict)
-    in
-        Value.Type(typed),
-                GetRows = () as table =>
-    let
-        skip        = Number.From(Record.FieldOrDefault(state, "Skip", 0)),
-        rawTake     = Record.FieldOrDefault(state, "Take", null),
+    filtered = Table.SelectRows(schema, each List.Contains(cols, [Name])),
+    empty  = Table.FromRows({},List.Transform(filtered[Name], each Text.From(_))),
+    typed  = SchemaTransformTable(empty, filtered, EnforceSchema.Strict)
+in
+    Value.Type(typed),
+    GetRows = () as table =>
+let
+    skip        = Number.From(Record.FieldOrDefault(state, "Skip", 0)),
+    rawTake     = Record.FieldOrDefault(state, "Take", null),
+    cols0       = Record.FieldOrDefault(state, "Columns", null),
+    orderBy     = Record.FieldOrDefault(state, "OrderBy", null),
+    filtersJson = Record.FieldOrDefault(state, "Filters", null),
+    localCond   = Record.FieldOrDefault(state, "LocalRowFilter", null),
 
-        cols0       = Record.FieldOrDefault(state, "Columns", null),
-        orderBy     = Record.FieldOrDefault(state, "OrderBy", null),
-        filtersJson = Record.FieldOrDefault(state, "Filters", null),
-        localCond   = Record.FieldOrDefault(state, "LocalRowFilter", null),
+    cols =
+        if cols0 is list and List.Count(cols0) > 0 then
+            List.Intersect({cols0, schema[Name]})
+        else
+            null,
 
-        cols =
-            if cols0 is list and List.Count(cols0) > 0 then
-                List.Intersect({cols0, schema[Name]})
-            else
-                null,
+    out0 =
+        Fetch(
+            skip,
+            if rawTake = null then null else Number.From(rawTake),
+            cols,
+            orderBy,
+            filtersJson
+        ),
 
-        out0 =
-    Fetch(
-        skip,
-        if rawTake = null then null else Number.From(rawTake),
-        cols,
-        orderBy,
-        filtersJson
-    ),
+    out1 =
+        if cols <> null then
+            Table.SelectColumns(out0, cols, MissingField.Ignore)
+        else
+            out0,
 
-        out1 =
-            if cols <> null then
-                Table.SelectColumns(out0, cols, MissingField.Ignore)
-            else
-                out0,
+    out2 =
+        if localCond <> null then
+            Table.SelectRows(out1, localCond)
+        else
+            out1,
 
-        out2 =
-            if localCond <> null then
-                Table.SelectRows(out1, localCond)
-            else
-                out1,
-                
     cols1 = Record.FieldOrDefault(state, "Columns", null),
     finalCols =
-    if cols1 is list and List.Count(cols1) > 0 then
-        List.Intersect({cols1, schema[Name]})
-    else
-        schema[Name],
+        if cols1 is list and List.Count(cols1) > 0 then
+            List.Intersect({cols1, schema[Name]})
+        else
+            schema[Name],
 
-    out3 = SchemaTransformTable(out2, 
+    out3 = SchemaTransformTable(
+        out2,
         Table.SelectRows(schema, each List.Contains(finalCols, [Name])),
-        EnforceSchema.Strict)
+        EnforceSchema.Strict
+    )
 in
-    out3,
+ out3,
 
         GetRowCount = () as number =>
-    let
-        filtersJson = Record.FieldOrDefault(state, "Filters", null),
-        count = GetDocTypeCount(baseUrl, doctype)
-    in
-        count,
+            let
+                filtersJson = Record.FieldOrDefault(state, "Filters", null),
+                count = GetDocTypeCount(baseUrl, doctype)
+            in
+                count,
 
-                OnTake = (count as number) as table => @View(state & [Take = count]),
-                OnSkip = (count as number) as table => @View(state & [Skip = count]),
-                OnSort = (sort as list) as table =>
-        @View(state & [OrderBy = SortToOrderBy(sort)]),
+        OnTake = (count as number) as table => @View(state & [Take = count]),
+        OnSkip = (count as number) as table => @View(state & [Skip = count]),
+       OnSort = (sort as list) as table =>
+    @View(state & [OrderBy = SortToOrderBy(sort)]),
+    OnSelectColumns = (cols as list) as table =>
+let
+    allowed0 = List.Intersect({cols, schema[Name]}),
+    allowed =
+        if List.Count(allowed0) = 0 then
+            null
+        else if List.Count(allowed0) = List.Count(schema[Name]) then
+            null
+        else
+            allowed0
+in
+    @View(state & [Columns = allowed]),
 
-                OnSelectColumns = (cols as list) as table =>
-    let
-        allowed0 = List.Intersect({cols, schema[Name]}),
-        allowed =
-            if List.Count(allowed0) = 0 then
-                null
-            else if List.Count(allowed0) = List.Count(schema[Name]) then
-                null
-            else
-                allowed0
-    in
-        @View(state & [Columns = allowed]),
-
-OnSelectRows = (condition as function) as table =>
+        OnSelectRows = (condition as function) as table =>
     let
         ast = RowExpression.From(condition),
         fj  = FiltersToFrappeJson(doctype, ast)
@@ -1052,8 +1043,8 @@ OnSelectRows = (condition as function) as table =>
             )
         else
             @View(state & [Filters = fj])
-            ]
-        ),
+        ]
+    ),
     out = View([Skip = 0, Take = null])
 in
     out;
@@ -1080,7 +1071,7 @@ let
             NavigationTable.ItemNameColumn = itemNameColumn,
             NavigationTable.IsLeafColumn = isLeafColumn,
 
-            // ✅ keeps the UI as table, but delays preview evaluation
+            // keeps the UI as table, but delays preview evaluation
             Preview.DelayColumn = dataColumn
         ],
     navTable = Value.ReplaceType(table, navType)
@@ -1096,14 +1087,14 @@ let
     docTypes = GetDocTypes(baseUrl),
     namesOnly = Table.Distinct(Table.SelectColumns(docTypes, {"name"})),
 
-    // ✅ Data is a function that returns a table
+    
     withData =
-        Table.AddColumn(
-            namesOnly,
-            "Data",
-            each () => GetDocTypeTable(baseUrl, [name]),
-            type function
-        ),
+    Table.AddColumn(
+        namesOnly,
+        "Data",
+        each GetDocTypeTable(baseUrl, [name]),
+        type table  
+    ),
 
     withKind   = Table.AddColumn(withData, "ItemKind", each "Table", type text),
     withItemNm = Table.AddColumn(withKind, "ItemName", each "Table", type text),
@@ -1122,10 +1113,8 @@ FrappeConn = [
     ],
     Label = "Frappe - Token Authentication (Dynamic Navigator)",
 
-    // ✅ TripPin Part 4
     DataSource.Path = FrappeConnPath,
 
-    // ✅ TripPin Part 9
     TestConnection = (dataSourcePath) => { "FrappeConn.Contents", dataSourcePath }
 ];
 
