@@ -7,16 +7,16 @@
     <MezOutputPath>$(OutputPath)$(MsBuildProjectName).mez</MezOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <MezContent Include="FrappeConn.pq" />
+    <MezContent Include="Frappe_Documents.pq" />
     <MezContent Include="Diagnostics.pqm" />
-    <MezContent Include="FrappeConn16.png" />
-    <MezContent Include="FrappeConn20.png" />
-    <MezContent Include="FrappeConn24.png" />
-    <MezContent Include="FrappeConn32.png" />
-    <MezContent Include="FrappeConn40.png" />
-    <MezContent Include="FrappeConn48.png" />
-    <MezContent Include="FrappeConn64.png" />
-    <MezContent Include="FrappeConn80.png" />
+    <MezContent Include="Frappe_Documents16.png" />
+    <MezContent Include="Frappe_Documents20.png" />
+    <MezContent Include="Frappe_Documents24.png" />
+    <MezContent Include="Frappe_Documents32.png" />
+    <MezContent Include="Frappe_Documents40.png" />
+    <MezContent Include="Frappe_Documents48.png" />
+    <MezContent Include="Frappe_Documents64.png" />
+    <MezContent Include="Frappe_Documents80.png" />
     <MezContent Include="resources.resx" />
   </ItemGroup>
   <Target Name="BuildMez" AfterTargets="Build" Inputs="@(MezContent)" Outputs="$(MezOutputPath)">

@@ -1,20 +1,20 @@
-section FrappeConn;
+section Frappe_Documents;
 
 // ----------------------------
 // Public entrypoint (Navigator)
 // ----------------------------
-[DataSource.Kind="FrappeConn", Publish="FrappeConn.Publish"]
-shared FrappeConn.Contents = (url as text) as table =>
+[DataSource.Kind="Frappe_Documents", Publish="Frappe_Documents.Publish"]
+shared Frappe_Documents.Contents = (url as text) as table =>
     FrappeNavTable(url);
 
 // Optional: keep Feed un-published (helper)
-[DataSource.Kind="FrappeConn"]
-shared FrappeConn.Feed = (url as text) as any =>
-    FrappeConnImpl(url);
+[DataSource.Kind="Frappe_Documents"]
+shared Frappe_Documents.Feed = (url as text) as any =>
+    Frappe_DocumentsImpl(url);
 
 // TripPin Part 9
-shared FrappeConn.TestConnection = (dataSourcePath as text) as list =>
-    { "FrappeConn.Contents", dataSourcePath };
+shared Frappe_Documents.TestConnection = (dataSourcePath as text) as list =>
+    { "Frappe_Documents.Contents", dataSourcePath };
     
 // Diagnostics (TripPin style) - load pqm as text and evaluate it
 Diagnostics =
@@ -45,7 +45,7 @@ in
     scheme & "://" & host & port & "/";
 
 // DataSource Path (TripPin Part 4): stable credential scope per host
-FrappeConnPath = (url as text) as text =>
+Frappe_DocumentsPath = (url as text) as text =>
 let
     parts  = Uri.Parts(url),
     scheme = parts[Scheme],
@@ -176,7 +176,7 @@ let
             null
         else
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "HTTP " & Text.From(status) & " - " & GetFrappeErrorMessage(body),
                 body
             ),
@@ -185,17 +185,17 @@ let
     _soft =
         if bodyJson <> null and IsFrappeErrorPayload(bodyJson) then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "Frappe Error - " & GetFrappeErrorMessage(bodyJson),
                 bodyJson
             )
         else
             null
 in
-    if bodyJson <> null then bodyJson else error Error.Record("FrappeConn", "Non-JSON response.", bodyText);
+    if bodyJson <> null then bodyJson else error Error.Record("Frappe_Documents", "Non-JSON response.", bodyText);
 
 // Returns raw JSON from base URL)
-FrappeConnImpl = (url as text) as any =>
+Frappe_DocumentsImpl = (url as text) as any =>
 let
     root = NormalizeBaseUrl(url),
     raw  = Web.Contents(root, [Headers = GetAuthHeaders(), ManualCredentials = true]),
@@ -221,13 +221,13 @@ let
     _ =
         if IsFrappeErrorPayload(json) then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "Frappe Error - " & GetFrappeErrorMessage(json),
                 json
             )
         else if not Record.HasFields(json, "message") then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "DocType list did not return [message].",
                 json
             )
@@ -359,7 +359,7 @@ let
     _ =
         if Table.RowCount(bad) > 0 then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "Invalid schema rows detected: " & context,
                 bad
             )
@@ -496,7 +496,7 @@ let
     _soft =
         if isSoftError then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "You don't have access to DocType: " & doctype,
                 GetFrappeErrorMessage(json)
             )
@@ -1037,7 +1037,7 @@ in
     in
         if fj = null then
             error Error.Record(
-                "FrappeConn",
+                "Frappe_Documents",
                 "Could not translate row filter to Frappe filters.",
                 ast
             )
@@ -1107,18 +1107,18 @@ in
 // ----------------------------
 // Data Source Kind & Publish
 // ----------------------------
-FrappeConn = [
+Frappe_Documents = [
     Authentication = [
         Key = []
     ],
     Label = "Frappe - Token Authentication (Dynamic Navigator)",
 
-    DataSource.Path = FrappeConnPath,
+    DataSource.Path = Frappe_DocumentsPath,
 
-    TestConnection = (dataSourcePath) => { "FrappeConn.Contents", dataSourcePath }
+    TestConnection = (dataSourcePath) => { "Frappe_Documents.Contents", dataSourcePath }
 ];
 
-FrappeConn.Publish = [
+Frappe_Documents.Publish = [
     Beta = true,
     Category = "Other",
     ButtonText = { "Frappe Documents", "Frappe Documents" }
