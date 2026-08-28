@@ -74,25 +74,116 @@ in
 GetAuthHeaders = () as record =>
 let
     cred = Extension.CurrentCredential(),
-    token =
+    authHeader =
         if cred = null then
             null
+        else if Record.HasFields(cred, "AuthenticationKind") and cred[AuthenticationKind] = "OAuth" then
+            "Bearer " & cred[access_token]
         else if Record.HasFields(cred, "Key") then
-            Text.From(cred[Key])
+            "token " & Text.From(cred[Key])
         else if Record.HasFields(cred, "Password") then
-            Text.From(cred[Password])
+            "token " & Text.From(cred[Password])
         else if Record.HasFields(cred, "ApiKey") then
-            Text.From(cred[ApiKey])
+            "token " & Text.From(cred[ApiKey])
         else
             null,
 
-    authHeader = if token <> null then "token " & token else null,
     headers =
         if authHeader <> null
         then Record.AddField(DefaultRequestHeaders, "Authorization", authHeader)
         else DefaultRequestHeaders
 in
     headers;
+
+// ----------------------------
+// OAuth 2.0 (Authorization Code + PKCE) - Milestone 3
+// Talks to Frappe's built-in provider (frappe.integrations.oauth2).
+// No client_secret embedded - the .mez can be unzipped, so a "confidential"
+// secret in it wouldn't be confidential. Frappe accepts PKCE public clients.
+// https://learn.microsoft.com/power-query/handling-authentication
+// ----------------------------
+client_id    = "vtf1vejj9v";
+oauth_scope  = "all";  // confirm with Saif - space-separated Frappe scopes
+redirect_uri = "https://oauth.powerbi.com/views/oauthredirect.html"; // fixed - required by Power BI
+
+// StartLogin isn't reliably handed a populated resourceUrl at the point the
+// credential dialog fires (confirmed via "Invalid URI: scheme not valid"),
+// so the Frappe host is fixed here instead of derived per-connection.
+// Update this if the OAuth Client ever moves off the demo site.
+FrappeBaseUrl = "https://demo.paralogic.io";
+
+windowWidth  = 720;
+windowHeight = 1024;
+
+Base64UrlEncode = (raw as binary) as text =>
+let
+    base64    = Binary.ToText(raw, BinaryEncoding.Base64),
+    urlSafe   = Text.Replace(Text.Replace(base64, "+", "-"), "/", "_"),
+    noPadding = Text.TrimEnd(urlSafe, "=")
+in
+    noPadding;
+
+StartLogin = (resourceUrl, state, display) =>
+let
+    codeVerifier  = Text.NewGuid() & Text.NewGuid(),
+    codeChallenge = Base64UrlEncode(Crypto.CreateHash(CryptoAlgorithm.SHA256, Text.ToBinary(codeVerifier))),
+    AuthorizeUrl  = FrappeBaseUrl & "/api/method/frappe.integrations.oauth2.authorize?" & Uri.BuildQueryString([
+        client_id             = client_id,
+        response_type         = "code",
+        scope                 = oauth_scope,
+        state                 = state,          // required in Power BI Service - don't drop this
+        redirect_uri          = redirect_uri,
+        code_challenge_method = "S256",
+        code_challenge        = codeChallenge
+    ])
+in
+    [
+        LoginUri     = AuthorizeUrl,
+        CallbackUri  = redirect_uri,
+        WindowHeight = windowHeight,
+        WindowWidth  = windowWidth,
+        Context      = codeVerifier             // round-tripped to FinishLogin
+    ];
+
+FinishLogin = (context, callbackUri, state) =>
+let
+    Parts = Uri.Parts(callbackUri)[Query]
+in
+    if (Parts[error]? <> null) then
+        error Error.Record(Parts[error], Parts[error_description]?)
+    else
+        TokenMethod(Parts[code], "authorization_code", context);
+
+TokenMethod = (code, grant_type, optional verifier) =>
+let
+    codeVerifierPart = if (verifier <> null) then [code_verifier = verifier] else [],
+    codeParameter    = if (grant_type = "authorization_code") then [code = code] else [refresh_token = code],
+    query = codeVerifierPart & codeParameter & [
+        client_id    = client_id,
+        grant_type   = grant_type,
+        redirect_uri = redirect_uri
+    ],
+    Response = Web.Contents(FrappeBaseUrl & "/api/method/frappe.integrations.oauth2.get_token", [
+        Content = Text.ToBinary(Uri.BuildQueryString(query)),
+        Headers = [
+            #"Content-type" = "application/x-www-form-urlencoded",
+            #"Accept" = "application/json"
+        ],
+        ManualStatusHandling = {400, 401}
+    ]),
+    Parts = Json.Document(Response)
+in
+    if (Parts[error]? <> null) then
+        error Error.Record(Parts[error], Parts[message]?)
+    else
+        Parts;
+
+Refresh = (resourceUrl, refresh_token) => TokenMethod(refresh_token, "refresh_token");
+
+// Logout removed for now — the IOAuthProvider.Logout crash happens before
+// the M engine reaches our function body (no evaluation frames in the
+// stack trace), so this tests whether just having Logout defined is
+// enough to trigger Power BI's pre-login cleanup codepath.
 
 // ----------------------------
 // Error message extractor
@@ -565,7 +656,14 @@ in
     nav;
 
 Frappe_Connector_Report = [
-    Authentication = [ Key = [] ],
+    Authentication = [
+        Key = [],
+        OAuth = [
+            StartLogin  = StartLogin,
+            FinishLogin = FinishLogin,
+            Refresh     = Refresh
+        ]
+    ],
     Label = "Frappe Reports",
     DataSource.Path = Frappe_Connector_ReportPath,
     TestConnection = (dataSourcePath) => { "Frappe_Connector_Report.Contents", dataSourcePath }
