@@ -277,4 +277,4 @@ You can fork this repository and create a pull request to contribute code. By co
 
 ## License
 
-Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt),
+Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see license.txt](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
