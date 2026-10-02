@@ -175,9 +175,10 @@ Under Service Settings, ensure the Gateway Service Account (`NT SERVICE\PBIEgwSe
 For Power BI Service to access the custom connector, the `.mez` file must be in:
 ```
 C:\WINDOWS\ServiceProfiles\PBIEgwService\Documents\Power BI Desktop\Custom Connectors
-
-Create any folders if they don't exist.
 ```
+
+Create any folders that don't exist 
+
 [Configure service gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors)
 
 Map the Data Gateway to the Custom Connectors folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
@@ -271,11 +272,9 @@ For issues or questions:
 **Compatibility**: Power BI Desktop / Service, Frappe v12+, ERPNext v12+  
 **Last Updated**: September 2026
 
-##Contribution
+## Contribution
 You can fork this repository and create a pull request to contribute code. By contributing to  Frappe Power BI Connector, you agree that your contributions will be licensed under its GNU General Public License (v3).
 
 ## License
 
-Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here] (https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
-
-[On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
