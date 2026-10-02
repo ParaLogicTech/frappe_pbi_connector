@@ -11,7 +11,7 @@ Before you begin, ensure you have the following:
 - **Power Query SDK** — [Download here](https://marketplace.visualstudio.com/items?itemName=PowerQuery.powerquerysdk)
 - **Frappe Framework instance** (ERPNext or custom Frappe app)
 - **Frappe instance must be HTTPS-enabled**
-- **Frappe PowerBI Integration installed on Frappe Site - [See here] (https://github.com/ParaLogicTech/pbi_integration)
+- **Frappe PowerBI Integration** installed on Frappe Site - [See here](https://github.com/ParaLogicTech/pbi_integration)
 - **OAuth 2.0 client configured in Frappe** with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
 
 ### Prerequisites
