@@ -237,7 +237,7 @@ For issues or questions:
 
 ## License
 
-This connector is provided as-is for integration between Power BI and Frappe Framework instances.
+This connector is provided as is for integration between Power BI and Frappe Framework instances.
 
 ---
 
