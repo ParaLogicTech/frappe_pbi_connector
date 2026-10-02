@@ -176,12 +176,11 @@ For Power BI Service to access the custom connector, the `.mez` file must be in:
 ```
 C:\WINDOWS\ServiceProfiles\PBIEgwService\Documents\Power BI Desktop\Custom Connectors
 
-Create any folders if they don't exist
-See [Configure service  gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors).
-
+Create any folders if they don't exist.
 ```
+[Configure service gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors)
 
-Map the Data Gateway to this folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
+Map the Data Gateway to the Custom Connectors folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
 
 ### Step 4 – Configure the gateway in Power BI Service
 
@@ -210,7 +209,7 @@ Map the Data Gateway to this folder. You should see FrappeDocuments/FrappeReport
 
 ### Step 6 – Schedule refresh
 
-Configure scheduled refresh using the gateway. See [Configure scheduled refresh documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh).
+Configure scheduled refresh using the gateway. See [Configure scheduled refresh documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh)
 
 ## URL Format
 
@@ -277,4 +276,6 @@ You can fork this repository and create a pull request to contribute code. By co
 
 ## License
 
-Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here] (https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt),
+Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here] (https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
+
+[On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
