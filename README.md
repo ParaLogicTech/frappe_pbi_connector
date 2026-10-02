@@ -11,7 +11,7 @@ Before you begin, ensure you have the following:
 - **Power Query SDK** — [Download here](https://marketplace.visualstudio.com/items?itemName=PowerQuery.powerquerysdk)
 - **Frappe Framework instance** (ERPNext or custom Frappe app)
 - **Frappe instance must be HTTPS-enabled**
-- **Frappe PowerBI Integration installed on Frappe Site - [See here] (https://github.com/ParaLogicTech/pbi_integration)
+- **Frappe PowerBI Integration** installed on Frappe Site - [See here](https://github.com/ParaLogicTech/pbi_integration)
 - **OAuth 2.0 client configured in Frappe** with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
 
 ### Prerequisites
@@ -157,7 +157,7 @@ The connector supports scheduled refresh through the Power BI service via a Powe
 
 ### Step 1 – Set up the data gateway
 
-1. Install the Power BI On-Premises Data Gateway in Standard mode. See [On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+1. Install the Power BI On-Premises Data Gateway in Standard mode. [See On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
 2. Select **Sign in**
 3. Select **Register a new gateway on this computer**
 4. Give the new gateway a name
@@ -180,7 +180,7 @@ Create any folders if they don't exist.
 ```
 [Configure service gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors)
 
-Map the Data Gateway to the Custom Connectors folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
+Map the Data Gateway to this folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
 
 ### Step 4 – Configure the gateway in Power BI Service
 
@@ -209,7 +209,7 @@ Map the Data Gateway to the Custom Connectors folder. You should see FrappeDocum
 
 ### Step 6 – Schedule refresh
 
-Configure scheduled refresh using the gateway. See [Configure scheduled refresh documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh)
+Configure scheduled refresh using the gateway. See [Configure scheduled refresh documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh).
 
 ## URL Format
 
@@ -276,6 +276,4 @@ You can fork this repository and create a pull request to contribute code. By co
 
 ## License
 
-Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here] (https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
-
-[On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see license.txt](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
