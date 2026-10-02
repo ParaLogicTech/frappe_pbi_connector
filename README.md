@@ -157,7 +157,7 @@ The connector supports scheduled refresh through the Power BI service via a Powe
 
 ### Step 1 – Set up the data gateway
 
-1. Install the Power BI On-Premises Data Gateway in Standard mode. See [On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+1. Install the Power BI On-Premises Data Gateway in Standard mode. [See On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
 2. Select **Sign in**
 3. Select **Register a new gateway on this computer**
 4. Give the new gateway a name
