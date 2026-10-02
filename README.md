@@ -176,10 +176,9 @@ For Power BI Service to access the custom connector, the `.mez` file must be in:
 ```
 C:\WINDOWS\ServiceProfiles\PBIEgwService\Documents\Power BI Desktop\Custom Connectors
 
-Create any folders if they don't exist
-See [Configure service  gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors).
-
+Create any folders if they don't exist.
 ```
+[Configure service gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors)
 
 Map the Data Gateway to this folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
 
