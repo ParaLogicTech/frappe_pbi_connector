@@ -33,13 +33,19 @@ jobs:
             }
           }
 
-      - name: Upload MEZ artifacts
+      - name: Bundle MEZ files
+        shell: pwsh
+        run: |
+          Compress-Archive -LiteralPath @(
+            'FrappeDocuments/bin/AnyCPU/Debug/FrappeDocuments.mez',
+            'FrappeReports/bin/AnyCPU/Debug/FrappeReports.mez'
+          ) -DestinationPath 'frappe-power-bi-connectors.zip' -Force
+
+      - name: Upload connector ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: frappe-power-bi-connectors
-          path: |
-            FrappeDocuments/bin/AnyCPU/Debug/FrappeDocuments.mez
-            FrappeReports/bin/AnyCPU/Debug/FrappeReports.mez
+          path: frappe-power-bi-connectors.zip
           if-no-files-found: error
 
   release:
@@ -49,13 +55,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download MEZ artifacts
+      - name: Download connector ZIP artifact
         uses: actions/download-artifact@v4
         with:
           name: frappe-power-bi-connectors
           path: artifacts
 
-      - name: Attach MEZ files to release
+      - name: Attach connector ZIP to release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -65,6 +71,5 @@ jobs:
             gh release create "$RELEASE_TAG" --verify-tag --generate-notes
           fi
           gh release upload "$RELEASE_TAG" \
-            artifacts/FrappeDocuments/bin/AnyCPU/Debug/FrappeDocuments.mez \
-            artifacts/FrappeReports/bin/AnyCPU/Debug/FrappeReports.mez \
+            artifacts/frappe-power-bi-connectors.zip \
             --clobber
