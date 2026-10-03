@@ -45,11 +45,12 @@ To build the connectors locally, follow these steps:
 
 The mez file are in your project's `bin\AnyCPU\Debug` folder.
 
-GitHub Actions builds both connectors on tag pushes and manual runs of the
+GitHub Actions builds both connectors on pushes of tags starting with `v` (for
+example, `v1.0.0`) and manual runs of the
 **Build connectors** workflow. Download the
 `frappe-power-bi-connectors` artifact from a successful workflow run to get
 `frappe-power-bi-connectors.zip`, which contains both `.mez` files. Runs for a tag
-create a GitHub release if needed and attach this ZIP to its assets. Manual runs
+starting with `v` create a GitHub release if needed and attach this ZIP to its assets. Manual runs
 for a branch only produce build artifacts.
 
 ### Step 2 - Enable Custom Connectors in Power BI Desktop
