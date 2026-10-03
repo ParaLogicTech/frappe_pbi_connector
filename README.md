@@ -26,6 +26,10 @@ Before you begin, ensure you have the following:
 
 ### Step 1 - Download and Build
 
+Download `FrappeDocuments.mez` and `FrappeReports.mez` from the assets of a
+[GitHub release](https://github.com/ParaLogicTech/frappe_pbi_connector/releases),
+then continue with Step 2. To build the connectors locally, follow these steps:
+
 1. Clone or download this repo from [GitHub](https://github.com/ParaLogicTech/frappe_pbi_connector)
 2. Extract the ZIP file to a folder on your computer
 3. Open Visual Studio Code
@@ -39,6 +43,12 @@ Before you begin, ensure you have the following:
    - `FrappeDocuments.mez`
 
 The mez file are in your project's `bin\AnyCPU\Debug` folder.
+
+GitHub Actions builds both connectors on tag pushes and manual runs of the
+**Build connectors** workflow. Download the
+`frappe-power-bi-connectors` artifact from a successful workflow run to get both
+`.mez` files. Runs for a tag create a GitHub release if needed and attach both
+`.mez` files to its assets. Manual runs for a branch only produce build artifacts.
 
 ### Step 2 - Enable Custom Connectors in Power BI Desktop
 
