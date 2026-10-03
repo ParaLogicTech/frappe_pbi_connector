@@ -1,6 +1,8 @@
-# Frappe Connector for Power BI
+# Frappe Power BI Connector
 
-This repo contains the code needed to create a Power Query and Power BI custom connector for Frappe Framework, allowing you to pull data from Frappe DocTypes or Reports directly into Power BI for custom analysis and visualization.
+This repo contains code needed to create a Power Query and Power BI custom connector for Frappe Framework, allowing you to pull data from DocTypes and Reports from Frappe sites directly into Power BI.
+
+Frappe Power BI Connector requires [Frappe Power BI Integration](https://github.com/ParaLogicTech/pbi_integration) App to be installed on Frappe sites.
 
 ## Getting started
 
@@ -11,7 +13,7 @@ Before you begin, ensure you have the following:
 - **Power Query SDK** — [Download here](https://marketplace.visualstudio.com/items?itemName=PowerQuery.powerquerysdk)
 - **Frappe Framework instance** (ERPNext or custom Frappe app)
 - **Frappe instance must be HTTPS-enabled**
-- **Frappe PowerBI Integration installed on Frappe Site - [See here] (https://github.com/ParaLogicTech/pbi_integration)
+- **Frappe PowerBI Integration installed on Frappe Site** - [See here] (https://github.com/ParaLogicTech/pbi_integration)
 - **OAuth 2.0 client configured in Frappe** with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
 
 ### Prerequisites
@@ -273,7 +275,7 @@ For issues or questions:
 **Last Updated**: September 2026
 
 ## Contribution
-You can fork this repository and create a pull request to contribute code. By contributing to  Frappe Power BI Connector, you agree that your contributions will be licensed under its GNU General Public License (v3).
+You can fork this repository and create a pull request to contribute code. By contributing to Frappe Power BI Connector, you agree that your contributions will be licensed under its GNU General Public License (v3).
 
 ## License
 
