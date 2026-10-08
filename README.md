@@ -1,259 +1,197 @@
-# Frappe Power BI Connector
+# Frappe Power BI Connectors
 
-This repo contains code needed to create a Power Query and Power BI custom connector for Frappe Framework, allowing you to pull data from DocTypes and Reports from Frappe sites directly into Power BI.
+Custom connectors for Power BI that allow you to pull data from Frappe DocTypes and Reports directly into Power BI for analysis and visualization.
 
-Frappe Power BI Connector requires [Frappe Power BI Integration](https://github.com/ParaLogicTech/pbi_integration) App to be installed on Frappe sites.
-
-## Getting started
-
-Before you begin, ensure you have the following:
+## Requirements
 
 - **Power BI Desktop** (latest version) — [Download here](https://powerbi.microsoft.com/en-us/desktop/)
-- **Visual Studio Code** — [Download here](https://code.visualstudio.com/)
-- **Power Query SDK** — [Download here](https://marketplace.visualstudio.com/items?itemName=PowerQuery.powerquerysdk)
-- **Frappe Framework instance** (ERPNext or custom Frappe app)
-- **Frappe instance must be HTTPS-enabled**
-- **Frappe PowerBI Integration installed on Frappe Site** - [See here] (https://github.com/ParaLogicTech/pbi_integration)
-- **OAuth 2.0 client configured in Frappe** with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
-
-### Prerequisites
-
-1. Verify your Frappe instance is accessible
-2. Ensure you have admin access to your Frappe instance to configure OAuth
-3. Have your Frappe user credentials ready for authentication
+- **Frappe Framework instance** (ERPNext or custom Frappe app) with HTTPS enabled
+- **Frappe PowerBI Integration app installed** on your Frappe site — [Install here](https://github.com/ParaLogicTech/pbi_integration)
+- **OAuth 2.0 client** configured in Frappe with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
+- Admin access to your Frappe instance to configure OAuth
 
 ## Installation
 
-### Step 1 - Download and Build
+### Step 1: Download the Connectors
 
-Download `frappe-power-bi-connectors.zip` from the assets of a
-[GitHub release](https://github.com/ParaLogicTech/frappe_pbi_connector/releases),
-extract `FrappeDocuments.mez` and `FrappeReports.mez`, then continue with Step 2.
-To build the connectors locally, follow these steps:
-
-1. Clone or download this repo from [GitHub](https://github.com/ParaLogicTech/frappe_pbi_connector)
-2. Extract the ZIP file to a folder on your computer
-3. Open Visual Studio Code
-4. Go to **Extensions** (left sidebar) and install **Power Query SDK**
-5. Restart VS Code
-6. Open the connector folder in VS Code: **File** → **Open Folder** → **frappe_pbi_connector** → select 'FrappeReports' or 'FrappeDocuments' folder
-7. Click on Terminal in the menu bar: **Terminal** → **Run Build Task** → **Build connector project using MakePQX**
-8. Build the connector
-9. Wait for the build to complete. You should see output files created:
-   - `FrappeReports.mez`
+1. Go to [GitHub Releases](https://github.com/ParaLogicTech/frappe_pbi_connector/releases)
+2. Download `frappe-power-bi-connectors.zip` from the latest release
+3. Extract the ZIP file to get:
    - `FrappeDocuments.mez`
+   - `FrappeReports.mez`
 
-The mez file are in your project's `bin\AnyCPU\Debug` folder.
-
-GitHub Actions builds both connectors on pushes of tags starting with `v` (for
-example, `v1.0.0`) and manual runs of the
-**Build connectors** workflow. Download the
-`frappe-power-bi-connectors` artifact from a successful workflow run to get
-`frappe-power-bi-connectors.zip`, which contains both `.mez` files. Runs for a tag
-starting with `v` create a GitHub release if needed and attach this ZIP to its assets. Manual runs
-for a branch only produce build artifacts.
-
-### Step 2 - Enable Custom Connectors in Power BI Desktop
-
-Power BI has security settings that prevent uncertified custom connectors from loading by default. You need to change this.
-
-1. Open **Power BI Desktop**
-2. Click **File** → **Options and settings** → **Options**
-3. In the left sidebar, select **Security**
-4. Under **Data Extensions**, select  the Not Recommended option:
-   - **(Recommended) Only allow Microsoft certified and other trusted third-party extensions to load** — for maximum security (requires certificate setup)
-   - **(Not Recommended) Allow any extension to load without validation or warning** — for quick testing
-5. Click **OK**
-6. **Restart Power BI Desktop completely**
-
-### Step 3 - Place the Connector Files
+### Step 2: Place Connector Files in Power BI
 
 1. Navigate to your Documents folder:
    ```
    C:\Users\[YourUsername]\Documents
    ```
 
-2. Create these folders insides **Documents** if they doesn't exist:
+2. Create this folder if it doesn't exist:
    ```
    Power BI Desktop\Custom Connectors
    ```
 
-3. Copy the built `.mez` files into this folder:
-   - `FrappeReports.mez`
+3. Copy the extracted `.mez` files into the Custom Connectors folder:
    - `FrappeDocuments.mez`
+   - `FrappeReports.mez`
 
 Your path should look like:
 ```
 C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors\FrappeDocuments.mez
 ```
 
-### Step 4 - Restart Power BI Desktop
+### Step 3: Configure Power BI Security Settings
 
-After placing the `.mez` files, restart Power BI Desktop completely. This allows Power BI to scan the Custom Connectors folder and register the new connectors.
+1. Open **Power BI Desktop**
+2. Click **File** → **Options and settings** → **Options**
+3. Select **Security** in the left sidebar
+4. Under **Data Extensions**, choose this option:
+   - **(Not Recommended) Allow any extension to load without validation or warning**
+5. Click **OK**
+6. **Restart Power BI Desktop completely**
 
-### Step 5 - Verify the Connector is Loaded
+### Step 4: Verify Installation
 
-1. In Power BI Desktop, click **Home** → **Get Data**
-2. Click **More...** at the bottom
-3. In the search box, type: **"Frappe"**
-4. You should see: **"Frappe Documents" and "Frappe Reports"**
+1. In Power BI Desktop, click **Get Data** → **More...**
+2. Search for: `"Frappe"`
+3. You should see both **"Frappe Documents"** and **"Frappe Reports"**
 
-If it doesn't appear:
-- Double check the file location (must be in Custom Connectors folder)
-- Verify the filename is exact: 'FrappeDocuments.mez'/'FrappeReports.mez'
-- Restart Power BI again
-- Check that you've enabled custom connectors in Security settings
-- Verify the build process completed successfully
+If they don't appear:
+- Verify `.mez` files are in the correct folder
+- Restart Power BI completely
+- Check Security settings are configured
+- Verify filenames are exactly: `FrappeDocuments.mez` and `FrappeReports.mez`
 
-## Using the Connector
+## Using the Connectors
 
 ### Initial Connection
 
-1. In Power BI Desktop, click **Get Data** → **More...**
+#### For Frappe Documents
+
+1. Click **Get Data** → **More...**
 2. Search for and select **"Frappe Documents"**
 3. Click **Connect**
-4. Enter your **Frappe Site URL** (e.g., `https://erp.yourcompany.com` or `erp.yourcompany.com`)
-5. For Frappe Reports, optionally enter **Filters** for filtering data before loading
-6. Click **Connect**
+4. Enter your **Frappe Site URL**:
+   - Full URL: `https://erp.yourcompany.com`
+   - Or just domain: `erp.yourcompany.com` (HTTPS is added automatically)
+5. Click **Connect**
+
+#### For Frappe Reports
+
+1. Click **Get Data** → **More...**
+2. Search for and select **"Frappe Reports"**
+3. Click **Connect**
+4. Enter your **Frappe Site URL**
+5. Click **Connect**
 
 ### Authentication
 
-**OAuth 2.0**
+#### OAuth 2.0 (Recommended)
 
 1. Click **Sign In** when prompted
 2. A browser window opens with the Frappe login page
 3. Enter your **Frappe username and password**
 4. Click **Log In**
-5. Authorize the Power BI Connector to access your Frappe data
+5. Authorize the Power BI Connector to access your data
 6. Click **Authorize** or **Allow**
-7. The browser will confirm, and the dialog in Power BI will close
-8. You're now authenticated and can browse available DocTypes/Reports
+7. The browser will close and you'll return to Power BI
+8. You're now authenticated
 
-**API Key and Secret**
-1. Navigate to the API Key tab 
-2. Add the API Key and Secret without spaces and a colon(:) in between the key and secret
+#### API Key and Secret
+
+1. Click the **API Key** tab in the connector dialog
+2. Enter your Frappe API Key and Secret in this format: `key:secret`
+   - Replace spaces with nothing
+   - Example: `abc123def456:xyz789uvw012`
 
 ### Browse and Load Data
 
-1. In the Navigator window, you'll see a list of available Frappe DocTypes/Frappe Reports
+1. In the Navigator window, you'll see available Frappe DocTypes or Reports
 2. Click on any DocType/Report to preview the data
-3. Expand the DocType/Report to see the columns and sample data
-4. Select the DocTypes/Reports you want to load
-5. Click **Load**/**Transform Data** to import the data into Power BI
-6. Power BI will fetch the data and add it to your workbook
+3. Select the ones you want to load
+4. Click **Load** to import into Power BI
+5. Power BI will fetch the data and add it to your workbook
 
-### Using Filters for Frappe Reports
+## Refreshing Data
 
-You can filter Frappe Reports before loading to add your custom filters:
-
-**JSON Format:**
-```json
-{"company": "Acme Inc", "status": "Active"}
-```
-
-**M Record Format:**
-```
-[company = "Acme Inc", status = "Active"]
-```
-
-Filters are applied server side on the Frappe server before data is transferred.
-
-## Data Refresh
-
-To refresh your data in Power BI:
+### Manual Refresh
 
 1. Click **Refresh** in the Power BI ribbon
-2. Power BI will re fetch the data from Frappe using your current authentication
-3. If your access token expires, Power BI will automatically request a new one
+2. Power BI will re-fetch data from Frappe
+3. Authentication tokens refresh automatically
 
-## Scheduled Refresh on Power BI Service
+### Scheduled Refresh on Power BI Service
 
-The connector supports scheduled refresh through the Power BI service via a Power BI On-Premises Data Gateway (Standard mode).
+The connector supports scheduled refresh using the **On-Premises Data Gateway**.
 
-### Step 1 – Set up the data gateway
+#### Setup Steps
 
-1. Install the Power BI On-Premises Data Gateway in Standard mode. See [On-premises data gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
-2. Select **Sign in**
-3. Select **Register a new gateway on this computer**
-4. Give the new gateway a name
-5. Provide and confirm a recovery key. **Save this key carefully — it cannot be restored if lost**
+1. **Install the gateway:**
+   - Download from [Power BI Gateway](https://powerbi.microsoft.com/en-us/gateway/)
+   - Run the installer and configure it
 
-### Step 2 - Set up the service account
+2. **Set up service account permissions:**
+   - Ensure `NT SERVICE\PBIEgwService` has access to the Custom Connectors folder
+   - Or change the service account to a local user account
 
-Under Service Settings, ensure the Gateway Service Account (`NT SERVICE\PBIEgwService`) has permissions to access the Custom Connectors folder:
+3. **Place connector files for gateway:**
+   - Copy `.mez` files to:
+     ```
+     C:\WINDOWS\ServiceProfiles\PBIEgwService\Documents\Power BI Desktop\Custom Connectors
+     ```
+   - Create any missing folders
 
-1. Add `NT SERVICE\PBIEgwService` to folder permissions for the Custom Connectors directory, OR
-2. Change the service account to a local user (requires restarting the gateway)
+4. **Upload your report to Power BI Service:**
+   - Go to https://app.powerbi.com
+   - Publish your Power BI workbook
 
-### Step 3 - Connect the custom connector
-
-For Power BI Service to access the custom connector, the `.mez` file must be in:
-```
-C:\WINDOWS\ServiceProfiles\PBIEgwService\Documents\Power BI Desktop\Custom Connectors
-```
-
-Create any folders that don't exist 
-
+5. **Configure gateway in Power BI Service:**
+   - Navigate to **Settings** → **Manage Connections and Gateways**
+   - Select your gateway and enable:
+     - "Allow user's custom data connectors to refresh through this gateway cluster"
 [Configure service gateway documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-custom-connectors)
 
-Map the Data Gateway to the Custom Connectors folder. You should see FrappeDocuments/FrappeReports appear as a custom connector option.
+6. **Set up scheduled refresh:**
+   - Go to your dataset **Settings** in Power BI Service
+   - Under **Gateway connection**, select your gateway
+   - Configure **Scheduled refresh** with your desired schedule
 
-### Step 4 – Configure the gateway in Power BI Service
-
-1. Go to https://app.powerbi.com
-2. Navigate to **Settings** → **Manage Connections and Gateways**
-3. Select the **On-premises data gateways** tab
-4. Select your gateway and click the ellipses (…) → **Settings**
-5. Ensure these options are enabled:
-   - Allow user's cloud data sources to refresh through this gateway cluster
-   - Allow user's custom data connectors to refresh through this gateway cluster
-6. Click **Save**
-
-**Optional**: Click **Manage users** to add other report developers who need access.
-
-### Step 5 – Upload a dataset and configure the gateway
-
-1. Publish a workbook using the connector to https://app.powerbi.com
-2. Navigate to your workspace and find the published dataset
-3. Click the ellipses (…) next to the dataset → **Settings**
-4. Expand **Gateway connection**
-5. Click the dropdown under **Actions** → **Manually add to gateway**
-6. Provide a data source name (e.g., "FrappeDocuments"/"FrappeReports")
-7. Set authentication type to **OAuth2**
-8. Set privacy level to **Organizational**
-9. Save and map the connector to your gateway
-
-### Step 6 – Schedule refresh
-
-Configure scheduled refresh using the gateway. See [Configure scheduled refresh documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh)
+For detailed steps, see [Microsoft's Scheduled Refresh Documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh)
 
 ## URL Format
 
 The connector accepts URLs in these formats:
+
 ```
 https://erp.yourcompany.com
 erp.yourcompany.com
 demo.erpnext.com
 ```
 
-The connector will automatically clean up and normalize the URL to use HTTPS.
-
+The connector automatically normalizes URLs to use HTTPS.
 
 ## Troubleshooting
 
-### Connector not appearing in Get Data
+### Connectors Not Appearing in Get Data
 
-- Verify `.mez` files are in: `Documents\Power BI Desktop\Custom Connectors\`
+- Verify `.mez` files are in: `C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors\`
 - Restart Power BI Desktop completely
-- Check that custom connectors are enabled in Security settings
-- Verify filenames are exact: 'FrappeDocuments.mez'/'FrappeReports.mez'
+- Check that Security settings are configured to allow custom connectors
+- Verify filenames are exact: `FrappeDocuments.mez` and `FrappeReports.mez`
 
+### "This is not a Frappe instance" or "pbi_integration not installed"
+
+- Verify your Frappe site URL is correct and accessible via browser
+- Ensure the **pbi_integration app** is installed on your Frappe instance
+- Contact your Frappe administrator to install the app if needed
 
 ### "HTTP 401 - Unauthorized"
 
 - Re-authenticate by removing and re-adding the data source
 - Verify OAuth client is configured in Frappe
 - Check that your Frappe user account is active
+- Verify your API Key and Secret if using API authentication
 
 ### "HTTP 403 - Forbidden"
 
@@ -261,14 +199,14 @@ The connector will automatically clean up and normalize the URL to use HTTPS.
 - Verify the DocType/Report is enabled in Frappe
 - Contact your Frappe administrator for access
 
-### Blank or no data appears
+### No Data Appears
 
 - Verify the DocType/Report exists and has data in your Frappe instance
 - Check if filters are excluding all rows (try removing filters)
-- Try selecting a different DocType/Report to verify the connector works
-- Ensure your Frappe user has read permissions on the DocType/Report
+- Try a different DocType/Report to verify the connector works
+- Ensure your Frappe user has read permissions
 
-## URL Display Note
+### URL Display Note
 
 Power BI's credential display may show `http://` even though your actual connection uses HTTPS internally. This is a Power BI UI limitation. Your data transfer is always secure with HTTPS.
 
@@ -276,20 +214,25 @@ Power BI's credential display may show `http://` even though your actual connect
 
 For issues or questions:
 
-1. Check the Troubleshooting section above
+1. Check the **Troubleshooting** section above
 2. Verify your Frappe instance is accessible via browser
 3. Contact your Frappe administrator for permission issues
-4. Check your internet connection is stable
+4. Ensure your internet connection is stable
 
-## Version
+## Building from Source
 
-**Connector Version**: 1.0  
-**Compatibility**: Power BI Desktop / Service, Frappe v12+, ERPNext v12+  
-**Last Updated**: September 2026
+For developers who want to modify the connectors, see [BUILD.md](BUILD.md).
+
+---
+
+**Version:** 1.0  
+**Compatibility:** Power BI Desktop / Service, Frappe v12+, ERPNext v12+  
+**Last Updated:** October 2026
 
 ## Contribution
-You can fork this repository and create a pull request to contribute code. By contributing to Frappe Power BI Connector, you agree that your contributions will be licensed under its GNU General Public License (v3).
+
+You can fork this repository and create a pull request to contribute. By contributing, you agree your contributions will be licensed under its GNU General Public License (v3).
 
 ## License
 
-Frappe Power BI Connector code is licensed as GNU General Public License (v3) and the copyright is owned by ParaLogic and Contributors [see here](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
+Frappe Power BI Connector is licensed under GNU General Public License (v3). Copyright owned by ParaLogic and Contributors. [See here](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
