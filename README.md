@@ -5,10 +5,8 @@ Custom connectors for Power BI that allow you to pull data from Frappe DocTypes 
 ## Requirements
 
 - **Power BI Desktop** (latest version) — [Download here](https://powerbi.microsoft.com/en-us/desktop/)
-- **Frappe Framework instance** (ERPNext or custom Frappe app) with HTTPS enabled
-- **Frappe PowerBI Integration app installed** on your Frappe site — [Install here](https://github.com/ParaLogicTech/pbi_integration)
-- **OAuth 2.0 client** configured in Frappe with redirect URI: `https://oauth.powerbi.com/views/oauthredirect.html`
-- Admin access to your Frappe instance to configure OAuth
+- **Frappe / ERPNext instance** (ERPNext or custom Frappe app) with HTTPS enabled
+- **Frappe PowerBI Integration app installed** on your Frappe site — [Link to app repository](https://github.com/ParaLogicTech/pbi_integration)
 
 ## Installation
 
@@ -20,28 +18,24 @@ Custom connectors for Power BI that allow you to pull data from Frappe DocTypes 
    - `FrappeDocuments.mez`
    - `FrappeReports.mez`
 
-### Step 2: Place Connector Files in Power BI
+### Step 2: Place Connector Files in Power BI Custom Connectors directory
 
-1. Navigate to your Documents folder:
+1. Navigate to your Documents\Power BI Desktop\Custom Connectors directory, create folders they do not exist:
    ```
-   C:\Users\[YourUsername]\Documents
-   ```
-
-2. Create this folder if it doesn't exist:
-   ```
-   Power BI Desktop\Custom Connectors
+   C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors
    ```
 
-3. Copy the extracted `.mez` files into the Custom Connectors folder:
+3. Copy the extracted `.mez` files into the `Custom Connectors` folder:
    - `FrappeDocuments.mez`
    - `FrappeReports.mez`
 
 Your path should look like:
 ```
 C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors\FrappeDocuments.mez
+C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors\FrappeReports.mez
 ```
 
-### Step 3: Configure Power BI Security Settings
+### Step 3: Configure Power BI Security Settings (Temporary)
 
 1. Open **Power BI Desktop**
 2. Click **File** → **Options and settings** → **Options**
@@ -67,22 +61,11 @@ If they don't appear:
 
 ### Initial Connection
 
-#### For Frappe Documents
-
 1. Click **Get Data** → **More...**
-2. Search for and select **"Frappe Documents"**
+2. Search for and select either **"Frappe Documents"** or  **"Frappe Reports"**
 3. Click **Connect**
 4. Enter your **Frappe Site URL**:
-   - Full URL: `https://erp.yourcompany.com`
-   - Or just domain: `erp.yourcompany.com` (HTTPS is added automatically)
-5. Click **Connect**
-
-#### For Frappe Reports
-
-1. Click **Get Data** → **More...**
-2. Search for and select **"Frappe Reports"**
-3. Click **Connect**
-4. Enter your **Frappe Site URL**
+   - Full URL: `https://erp.yourcompany.com` with HTTPs protocol
 5. Click **Connect**
 
 ### Authentication
@@ -90,20 +73,21 @@ If they don't appear:
 #### OAuth 2.0 (Recommended)
 
 1. Click **Sign In** when prompted
-2. A browser window opens with the Frappe login page
-3. Enter your **Frappe username and password**
+2. A browser window will open with the Frappe login page
+3. Enter your **Frappe email/username and password**
 4. Click **Log In**
 5. Authorize the Power BI Connector to access your data
 6. Click **Authorize** or **Allow**
 7. The browser will close and you'll return to Power BI
-8. You're now authenticated
+8. You should now be authenticated
 
 #### API Key and Secret
 
 1. Click the **API Key** tab in the connector dialog
-2. Enter your Frappe API Key and Secret in this format: `key:secret`
-   - Replace spaces with nothing
+2. Enter your Frappe API Key and Secret in the Account Key field:
+   - In this format: `api_key:api_secret`
    - Example: `abc123def456:xyz789uvw012`
+   - Ensure there are no spaces in the the account key field
 
 ### Browse and Load Data
 
@@ -159,21 +143,9 @@ The connector supports scheduled refresh using the **On-Premises Data Gateway**.
 
 For detailed steps, see [Microsoft's Scheduled Refresh Documentation](https://learn.microsoft.com/en-us/power-bi/connect-data/refresh-scheduled-refresh)
 
-## URL Format
-
-The connector accepts URLs in these formats:
-
-```
-https://erp.yourcompany.com
-erp.yourcompany.com
-demo.erpnext.com
-```
-
-The connector automatically normalizes URLs to use HTTPS.
-
 ## Troubleshooting
 
-### Connectors Not Appearing in Get Data
+### Connectors Not Appearing in "Get Data" dialog
 
 - Verify `.mez` files are in: `C:\Users\[YourUsername]\Documents\Power BI Desktop\Custom Connectors\`
 - Restart Power BI Desktop completely
@@ -202,13 +174,13 @@ The connector automatically normalizes URLs to use HTTPS.
 ### No Data Appears
 
 - Verify the DocType/Report exists and has data in your Frappe instance
-- Check if filters are excluding all rows (try removing filters)
+- Check if the filters applied have valid data (try removing filters)
 - Try a different DocType/Report to verify the connector works
 - Ensure your Frappe user has read permissions
 
 ### URL Display Note
 
-Power BI's credential display may show `http://` even though your actual connection uses HTTPS internally. This is a Power BI UI limitation. Your data transfer is always secure with HTTPS.
+Power BI's credential display may show `http://` even though your actual connection uses HTTPs internally. Make sure you enter your Frappe Site URLs with `https://` prefix to ensure this message does not appear.
 
 ## Support
 
@@ -218,16 +190,15 @@ For issues or questions:
 2. Verify your Frappe instance is accessible via browser
 3. Contact your Frappe administrator for permission issues
 4. Ensure your internet connection is stable
+5. You create an issue on this repository (here)[https://github.com/ParaLogicTech/frappe_pbi_connector/issues]
 
 ## Building from Source
 
 For developers who want to modify the connectors, see [BUILD.md](BUILD.md).
 
 ---
-
-**Version:** 1.0  
-**Compatibility:** Power BI Desktop / Service, Frappe v12+, ERPNext v12+  
-**Last Updated:** October 2026
+  
+**Compatibility:** Power BI Desktop / Service, ParaLogic's fork of Frappe v12+ (to be enabled for vanilla Frappe soon)
 
 ## Contribution
 
