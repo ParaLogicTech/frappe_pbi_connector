@@ -229,4 +229,4 @@ Frappe Power BI Connector is licensed under GNU General Public License (v3). Cop
 ![Authorize Access](<docs/screenshots/Screenshot 2026-10-12 013155.png>)
 
 #### Browse and Load Data
-![Browse and Load Data](<docs/screenshots/Screenshot 2026-10-12 011258.png>)
+![Browse and Load Data](<docs/screenshots/Screenshot 2026-10-12 021638.png>)
