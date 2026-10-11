@@ -207,3 +207,26 @@ You can fork this repository and create a pull request to contribute. By contrib
 ## License
 
 Frappe Power BI Connector is licensed under GNU General Public License (v3). Copyright owned by ParaLogic and Contributors. [See here](https://github.com/ParaLogicTech/frappe_pbi_connector/blob/master/license.txt)
+
+## Screenshots
+
+#### Place Connector Files in Power BI Custom Connectors directory
+![Place Connector Files in Power BI Custom Connectors directory](<docs/screenshots/Screenshot 2026-10-12 011258.png>)
+
+#### Configure Power BI Security Settings
+![Configure Power BI Security Settings](<docs/screenshots/Screenshot 2026-10-12 011258.png>)
+
+#### Verify Installation
+![Verify Installation](<docs/screenshots/Screenshot 2026-10-12 012850.png>)
+
+#### Initial Connection
+![Initial Connection](<docs/screenshots/Screenshot 2026-10-12 013035.png>)
+
+#### OAuth 2.0 (Recommended)
+![OAuth 2.0](<docs/screenshots/Screenshot 2026-10-12 013142.png>)
+
+#### Authorize Access
+![Authorize Access](<docs/screenshots/Screenshot 2026-10-12 013155.png>)
+
+#### Browse and Load Data
+![Browse and Load Data](<docs/screenshots/Screenshot 2026-10-12 011258.png>)
