@@ -117,7 +117,33 @@ in
 
 
 GetClientId = (root as text) as text =>
-    Json.Document(Web.Contents(root & "/api/method/pbi_integration.api.settings.get_oauth_client_id", [ManualCredentials = true]))[message];
+    let
+        response = Web.Contents(
+            root & "/api/method/pbi_integration.api.settings.get_oauth_client_id", 
+            [
+                ManualCredentials = true,
+                ManualStatusHandling = {400, 401, 403, 404, 417, 422, 429, 500, 501, 502, 503}
+            ]
+        ),
+        
+        json = try Json.Document(response) otherwise error Error.Record(
+            "FrappeDocuments",
+            "This is not a Frappe instance",
+            null
+        ),
+        
+        message = try json[message] otherwise 
+            let
+                body = try Json.Document(response) otherwise null,
+                errorBody = if body <> null then GetFrappeErrorMessage(body) else "",
+                customMsg = if Text.Contains(errorBody, "App pbi_integration is not installed") then
+                    "Frappe PowerBI Integration app is not installed"
+                else
+                    "This is not a Frappe instance"
+            in
+                error Error.Record("FrappeDocuments", customMsg, null)
+    in
+        message;
 
 EscapeForQuery = (v as text) as text =>
     Text.Replace(Uri.EscapeDataString(v), "|", "%7C");
@@ -273,12 +299,22 @@ let
 
     // 1) HTTP errors -> raise with Frappe message (if any)
     _http =
-        if status >= 200 and status < 300 then
-            null
-        else
+    if status >= 200 and status < 300 then
+        null
+    else
+        let
+            errorBody = if bodyJson <> null then GetFrappeErrorMessage(bodyJson) else Text.FromBinary(body),
+            customMsg =
+                if Text.Contains(errorBody, "App pbi_integration is not installed") then
+                    "Frappe PowerBI Integration app is not installed"
+                else if status >= 400 and status < 500 then
+                    "This is not a Frappe instance"
+                else
+                    "HTTP " & Text.From(status) & " - " & errorBody
+        in
             error Error.Record(
-                "FrappeDocuments",
-                "HTTP " & Text.From(status) & " - " & GetFrappeErrorMessage(body),
+                "FrappeReports",
+                customMsg,
                 body
             ),
 
@@ -1233,7 +1269,7 @@ FrappeDocuments.Icons = [
 ];
 
 FrappeDocuments.Publish = [
-    Beta = true,
+    Beta = false,
     Category = "Other",
     ButtonText = { "Frappe Documents", "Frappe Documents" },
     SourceImage = FrappeDocuments.Icons,
