@@ -177,11 +177,14 @@ For detailed steps, see [Microsoft's Scheduled Refresh Documentation](https://le
 - Check that Security settings are configured to allow custom connectors
 - Verify filenames are exact: `FrappeDocuments.mez` and `FrappeReports.mez`
 
-### "This is not a Frappe instance" or "pbi_integration not installed"
+### "Frappe PowerBI Integration app is not installed"
 
 - Verify your Frappe site URL is correct and accessible via browser
 - Ensure the **pbi_integration app** is installed on your Frappe instance
 - Contact your Frappe administrator to install the app if needed
+
+### "This is not a Frappe instance"
+- Verify that the URL that you entered is correct and is a valid Frappe instance
 
 ### "HTTP 401 - Unauthorized"
 
