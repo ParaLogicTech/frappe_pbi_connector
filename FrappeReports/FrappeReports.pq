@@ -16,25 +16,17 @@ in
 
 [DataSource.Kind="FrappeReports", Publish="FrappeReports.Publish"]
 shared FrappeReports.Contents = Value.ReplaceType(
-    (url as text, optional filtersJson as nullable text) =>
-        let
-            // Normalize URL at entry point before any other processing
-            normalizedUrl = NormalizeUrlScheme(url),
-            filters = if filtersJson = null or Text.Trim(filtersJson) = "" then "{}" else filtersJson
+    (url as text) as table =>
+    let
+        NormalizedUrl = NormalizeUrlScheme(url),
+        Result = FrappeReportsNavTable(NormalizedUrl)
         in
-            FrappeReportsNavTable(normalizedUrl, filters),
+        Result,
     type function (
         url as (Uri.Type meta [
             Documentation.FieldCaption = "Frappe Site URL",
             Documentation.FieldDescription = "Enter the URL of your Frappe site (e.g. https://erp.yourinstance.com).",
             Documentation.SampleValues = {"https://erp.yourinstance.com"}
-        ]),
-        optional filtersJson as (type nullable text meta [
-        Documentation.FieldCaption = "Filters (JSON/M Record)",
-        Documentation.FieldDescription = "Enter filters as JSON e.g. {""company"":""J. Y. Foods""} or M record e.g. [company = ""J. Y. Foods""]",
-        Documentation.SampleValues = {"[company = ""Sample Company""]"},
-        Formatting.IsMultiLine = true,
-        Formatting.IsCode = true
         ])
     ) as table meta [
         Documentation.Name = "Frappe Reports",
@@ -119,7 +111,33 @@ in
     noPadding;
 
 GetClientId = (root as text) as text =>
-    Json.Document(Web.Contents(root & "/api/method/pbi_integration.api.settings.get_oauth_client_id", [ManualCredentials = true]))[message];
+    let
+        response = Web.Contents(
+            root & "/api/method/pbi_integration.api.settings.get_oauth_client_id", 
+            [
+                ManualCredentials = true,
+                ManualStatusHandling = {400, 401, 403, 404, 417, 422, 429, 500, 501, 502, 503}
+            ]
+        ),
+        
+        json = try Json.Document(response) otherwise error Error.Record(
+            "FrappeReports",
+            "This is not a Frappe instance",
+            null
+        ),
+        
+        message = try json[message] otherwise 
+            let
+                body = try Json.Document(response) otherwise null,
+                errorBody = if body <> null then GetFrappeErrorMessage(body) else "",
+                customMsg = if Text.Contains(errorBody, "App pbi_integration is not installed") then
+                    "Frappe PowerBI Integration app is not installed"
+                else
+                    "This is not a Frappe instance"
+            in
+                error Error.Record("FrappeReports", customMsg, null)
+    in
+        message;
 
 
 EscapeForQuery = (v as text) as text =>
@@ -135,7 +153,7 @@ let
         & "client_id="             & EscapeForQuery(GetClientId(root))
         & "&response_type=code"
         & "&scope="                & EscapeForQuery(oauth_scope)
-        & "&state="                & EscapeForQuery(state)          // required in Power BI Service - don't drop this
+        & "&state="                & EscapeForQuery(state)          // required in Power BI Service
         & "&redirect_uri="         & EscapeForQuery(redirect_uri)
         & "&code_challenge_method=S256"
         & "&code_challenge="       & EscapeForQuery(codeChallenge)
@@ -204,9 +222,12 @@ let
         if body = null then
             "No response body."
         else if body is record then
-            if Record.HasFields(body, "exception") then Text.From(body[exception])
-            else if Record.HasFields(body, "message") then Text.From(body[message])
-            else if Record.HasFields(body, "_error_message") then Text.From(body[_error_message])
+            if Record.HasFields(body, "exception") then
+                Text.From(body[exception])
+            else if Record.HasFields(body, "message") then
+                Text.From(body[message])
+            else if Record.HasFields(body, "_error_message") then
+                Text.From(body[_error_message])
             else if Record.HasFields(body, "error") then
                 let e = body[error]
                 in if e is record and Record.HasFields(e, "message") then Text.From(e[message]) else Text.From(e)
@@ -216,7 +237,6 @@ let
             Text.From(body)
 in
     msg;
-
 // ----------------------------
 // Generic JSON GET (RelativePath + Query) with Frappe exception as error
 // ----------------------------
@@ -293,12 +313,22 @@ let
 
     // 1) HTTP errors -> raise with Frappe message (if any)
     _http =
-        if status >= 200 and status < 300 then
-            null
-        else
+    if status >= 200 and status < 300 then
+        null
+    else
+        let
+            errorBody = if bodyJson <> null then GetFrappeErrorMessage(bodyJson) else Text.FromBinary(body),
+            customMsg =
+                if Text.Contains(errorBody, "App pbi_integration is not installed") then
+                    "Frappe PowerBI Integration app is not installed"
+                else if status >= 400 and status < 500 then
+                    "This is not a Frappe instance"
+                else
+                    "HTTP " & Text.From(status) & " - " & errorBody
+        in
             error Error.Record(
                 "FrappeReports",
-                "HTTP " & Text.From(status) & " - " & GetFrappeErrorMessage(body),
+                customMsg,
                 body
             ),
 
@@ -337,8 +367,6 @@ let
             order_by = "name"
         ]
     ),
-
-    // message is a list directly not json[message][data]
     rows =
         if IsFrappeErrorPayload(json) then
             error Error.Record(
@@ -349,7 +377,7 @@ let
         else if not Record.HasFields(json, "message") then
             error Error.Record(
                 "FrappeReports",
-                "Report sources did not return [message]. Fields present: " & Text.Combine(Record.FieldNames(json), ", "),
+                "Report sources did not return [message].",
                 json
             )
         else
@@ -367,30 +395,6 @@ let
     )
 in
     t1;
-
-// ----------------------------
-// Filters table helper
-// ----------------------------
-GetFiltersForReport = (filtersTable as table, reportName as text) as text =>
-let
-    rows = Table.SelectRows(
-        filtersTable,
-        each Text.Lower(Text.Trim([report_name])) = Text.Lower(Text.Trim(reportName))
-    ),
-
-    records = Table.ToRecords(rows),
-
-    asRecord =
-        Record.FromList(
-            List.Transform(records, each Text.From([value])),
-            List.Transform(records, each Text.From([field_name]))
-        ),
-
-    json =
-        if Record.FieldCount(asRecord) = 0 then "{}"
-        else Text.FromBinary(Json.FromValue(asRecord))
-in
-    json;
 
 // Same type mapping as DocTypes connector
 ReportFieldTypeToMType = (ft as nullable text) as type =>
@@ -448,14 +452,14 @@ in
 // ----------------------------
 // Step 3: Fetch report data from Frappe
 
-GetReportData = (baseUrl as text, reportSourceName as text, filtersJson as text) as table =>
+GetReportData = (baseUrl as text, reportSourceName as text) as table =>
 let
     json = FrappeGetJson(
         baseUrl,
         "/api/method/pbi_integration.api.reports.get_report_source_content",
         [
             report_source = reportSourceName,
-            filters       = filtersJson,
+            filters       = "{}",
             for_preview   = "0"
         ]
     ),
@@ -556,9 +560,9 @@ in
 // ----------------------------
 // Step 4: Report Table with Table.View
 // ----------------------------
-GetReportTable = (baseUrl as text, reportSourceName as text, filtersInput as any) as table =>
+GetReportTable = (baseUrl as text, reportSourceName as text) as table =>
 let
-    dataTable = GetReportData(baseUrl, reportSourceName, filtersInput),
+    dataTable = GetReportData(baseUrl, reportSourceName),
     schema    = Value.Type(dataTable),
 
     View = (state as record) as table =>
@@ -624,7 +628,7 @@ let
 in
     navTable;
 
-FrappeReportsNavTable = (url as text, filtersInput as any) as table =>
+FrappeReportsNavTable = (url as text) as table =>
 let
     baseUrl   = Text.From(url),
     reports   = GetReportsList(baseUrl),
@@ -634,7 +638,7 @@ let
         Table.AddColumn(
             namesOnly,
             "Data",
-            each GetReportTable(baseUrl, [name], filtersInput),
+            each GetReportTable(baseUrl, [name]),
             type table
         ),
 
@@ -655,7 +659,7 @@ in
     nav;
 
 
-FrappeReportsPath = (url as text, optional filtersJson as nullable text) as text =>
+FrappeReportsPath = (url as text) as text =>
 let
     // Normalize and clean URL structure
     normalized = NormalizeUrlScheme(url),
@@ -706,7 +710,7 @@ FrappeReports.Icons = [
 ];
 
 FrappeReports.Publish = [
-    Beta = true,
+    Beta = false,
     Category = "Other",
     ButtonText = { "Frappe Reports", "Frappe Reports" },
     SourceImage = FrappeReports.Icons,
