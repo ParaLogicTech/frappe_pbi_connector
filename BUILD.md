@@ -39,24 +39,16 @@ After successful build, you'll find `.mez` files in:
 FrappeReports/bin/AnyCPU/Debug/FrappeReports.mez
 FrappeDocuments/bin/AnyCPU/Debug/FrappeDocuments.mez
 ```
+## Frappe Power BI Connectors
 
-### FrappeReports.pq
+- **Frappe Reports** - Query and fetch report data from Frappe Reports
+- **Frappe Documents** - Fetch DocType data with pagination and filter support
 
-Main connector for querying Frappe Reports:
-- OAuth 2.0 authentication and API Key authentication
-- URL normalization
-- Frappe instance and app validation
-- Error handling with user friendly messages
-- Report data fetching
-
-### FrappeDocuments.pq
-
-Main connector for querying Frappe DocTypes:
-- OAuth 2.0 and API Key authentication
-- URL normalization
-- Instance and app validation
-- DocType data fetching with pagination
-- Comprehensive error handling
+- Authentication: OAuth 2.0 and API Key support
+- URL normalization: Handles various URL formats, forces HTTPS
+- Validation: Frappe instance and pbi_integration app detection
+- Error handling: User friendly messages for common failure scenarios
+- Comprehensive error handling: Distinguishes between invalid URLs, missing app installation, and authentication failures
 
 ## Making Code Changes
 
