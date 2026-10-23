@@ -110,6 +110,39 @@ If they don't appear:
 
 ![Browse and Load Data](<docs/screenshots/Screenshot 2026-10-12 021638.png>)
 
+## Query Folding for Better Performance
+
+Frappe Documents Power BI connector supports Query Folding. It pushes your filters and transformations down to the Frappe server instead of Power BI doing it which results in more efficient processing, making your file faster and occupy less space.
+
+### Supported Query Folding Operations
+
+The Frappe Documents connector supports these operations on the server side:
+
+- **Select Columns** – Choose only the columns you need
+- **Select Rows** – Filter data by conditions (e.g., `[status] = "Active"`)
+- **Remove Top Rows** – Skip a number of records
+- **Keep Rows** – Limit results to a specific number
+- **Sort** – Order results by column
+- **Count Rows** – Get the total row count
+
+### How to Use Query Folding Efficiently
+
+**Apply filters BEFORE custom columns:**
+
+1. Load your Frappe DocType
+2. Select only the columns you need
+3. Filter rows with conditions
+4. Sort if needed
+5. And then add custom columns or complex transformations
+
+### Performance Tips
+
+- Remove unnecessary columns after loading
+- Filter by status, date range, or other conditions early
+- Apply sorting in Power Query editor
+- Add calculated columns only after filtering is complete
+- This keeps your Power BI file small and refreshes faster
+
 ## Refreshing Data
 
 ### Manual Refresh
